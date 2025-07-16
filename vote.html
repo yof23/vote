@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Bote</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <style>
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100svw;
+            height: 100svh;
+            background-color: #f8f0e0;
+            overflow: hidden;
+        }
+        .container {
+            width: 100%;
+            height: 100%;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .stats-area {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+        }
+        #result {
+            text-align: center;
+        }
+        .visual-area {
+            flex: 1;
+            padding: 0 12px;
+            border: 4px solid #002286;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+        }
+        .graph ul {
+            list-style: none;
+            padding: 12px;
+        }
+        .graph ul li {
+            display: flex;
+            align-items: center;
+        }
+        .sp_color {
+            display: inline-block;
+            width: 1em;
+        }
+        .sp_name {
+            display: inline-block;
+            width: 80px;
+            margin-left: 0.2em;
+        }
+        .sp_point {
+            display: inline-block;
+            width: 20px;
+            margin-left: 1em;
+            text-align: right;
+            font-size: 0.9em;
+        }
+        .sp_grh {
+            display: inline-block;
+            width: calc(100% - 1em - 80px - 20px - 0.2em - 1em - 2em);
+            height: 1.0em;
+            margin-left: 2em;
+            background-color: #ccc;
+            transform: scaleX(0);
+            transform-origin: left;
+        }
+        .news {
+            height: 160px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+        }
+        #newsComment {
+            position: relative;
+            border: 4px solid #002286;
+            border-radius: 24px;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px;
+            width: 100%;
+            height: 100%;
+            transform: translateX(100vw);
+        }
+        #newsComment::after {
+            content: "ニュース速報";
+            position: absolute;
+            top: -0.5em;
+            left: 1em;
+            background-color: #fff;
+            padding: 0 6px;
+            font-size: 1.1em;
+        }
+        #newsComment.active {
+            animation: anim-news-comment 3s ease-in-out forwards;
+        }
+        @keyframes anim-news-comment {
+            0% {transform: translateX(100vw);}
+            8% {transform: translateX(0);}
+            92% {transform: translateX(0);}
+            100% {transform: translateX(-100vw);}
+        }
+        #newsName {
+            display: inline-block;
+            font-weight: bold;
+            margin: 0 0.4em;
+        }
+        #newsP {
+            display: inline-block;
+            margin: 0.2em 0.4em;
+            font-size: 1.05em;
+        }
+        #newsS {
+            font-size: 4em;
+        }
+        .newsToimashita {
+            display: inline-block;
+            margin: 0 0.4em;
+        }
+        #reloadBtn {
+            position: absolute;
+            padding: 12px 36px;
+            border: 3px solid #002286;
+            border-radius: 100px;
+            color: #002286;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        #civiler {
+            padding: 12px;
+        }
+        #civiler span {
+            display: inline-block;
+            font-size: 1.2em;
+            width: calc(100% / 16);
+            text-align: center;
+            line-height: 1;
+            color: #ccc;
+        }
+        .oparate-area {
+            padding: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            gap: 8px 12px;
+        }
+        .oparate-area button {
+            padding: 2px 0;
+            width: calc((100% - 24px) / 3);
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        .transparent {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="stats-area">
+            <div class="ttl">THE VOTE</div>
+            <div id="result"></div>
+            <div id="clock"></div>
+        </div>
+        <div class="visual-area">
+            <div class="graph">
+                <ul>
+                    <li id="li0"><span class="sp_color" id="sp_color0">■</span><span class="sp_name" id="sp_name0"></span><span class="sp_point transparent" id="sp_point0"></span><span class="sp_grh transparent" id="sp_grh0"></span></li>
+                    <li id="li1"><span class="sp_color" id="sp_color1">■</span><span class="sp_name" id="sp_name1"></span><span class="sp_point transparent" id="sp_point1"></span><span class="sp_grh transparent" id="sp_grh1"></span></li>
+                    <li id="li2"><span class="sp_color" id="sp_color2">■</span><span class="sp_name" id="sp_name2"></span><span class="sp_point transparent" id="sp_point2"></span><span class="sp_grh transparent" id="sp_grh2"></span></li>
+                    <li id="li3"><span class="sp_color" id="sp_color3">■</span><span class="sp_name" id="sp_name3"></span><span class="sp_point transparent" id="sp_point3"></span><span class="sp_grh transparent" id="sp_grh3"></span></li>
+                    <li id="li4"><span class="sp_color" id="sp_color4">■</span><span class="sp_name" id="sp_name4"></span><span class="sp_point transparent" id="sp_point4"></span><span class="sp_grh transparent" id="sp_grh4"></span></li>
+                    <li id="li5"><span class="sp_color" id="sp_color5">■</span><span class="sp_name" id="sp_name5"></span><span class="sp_point transparent" id="sp_point5"></span><span class="sp_grh transparent" id="sp_grh5"></span></li>
+                </ul>
+            </div>
+            <div class="news">
+                <div id="newsComment">
+                    <p class="newsmessage"><span id="newsName"></span>が<br><span id="newsP"></span><br><span class="newsToimashita">と言いました。</span></p>
+                    <span id="newsS"><i class="bi bi-person-fill"></i></span>
+                </div>
+                <div id="reloadBtn" class="hidden" onclick="location.reload();">もういちど</div>
+            </div>
+            <div id="civiler"></div>
+        </div>
+        <div class="oparate-area">
+            <button id="btn0">なぐさめ党</button>
+            <button id="btn1">なかよし党</button>
+            <button id="btn2">やさしい党</button>
+            <button id="btn3">はたらく党</button>
+            <button id="btn4">がんばる党</button>
+            <button id="btn5">いちばん党</button>
+        </div>
+    </div>
+
+    <script>
+        const timespeed = 10;
+        let nowtime = "8:00";
+        let voteSum = 0;
+        let timecoenum = 1;
+        let selectedPartyIndex = null;
+        let previousAllocations = [];
+        let previousColorPool = [];
+
+        const politicalParties = [
+            { name: "なぐさめ党", parity: 0.8, coef: 1, point: 0, color: "#c00" },
+            { name: "なかよし党", parity: 1.0, coef: 1, point: 0, color: "#840" },
+            { name: "やさしい党", parity: 1.2, coef: 1, point: 0, color: "#880" },
+            { name: "はたらく党", parity: 1.2, coef: 1, point: 0, color: "#088" },
+            { name: "がんばる党", parity: 1.0, coef: 1, point: 0, color: "#048" },
+            { name: "いちばん党", parity: 0.8, coef: 1, point: 0, color: "#00c" },
+        ];
+
+        const publicOpinionMsg = [
+            { target: 0, effect: 1.45, msg: "みんなにごはんをくばるよ" },
+            { target: 0, effect: 1.4, msg: "びょういんをふやすよ" },
+            { target: 0, effect: 1.35, msg: "べんきょうをたすけるよ" },
+            { target: 0, effect: 1.3, msg: "こまってる人をまもるよ" },
+            { target: 0, effect: 1.25, msg: "みんなでわけあおうね" },
+            { target: 0, effect: 1.44, msg: "おなかすいた人にごはんを" },
+            { target: 0, effect: 1.43, msg: "みんながあんしんしてねられるように" },
+            { target: 0, effect: 1.42, msg: "おかねがなくてもだいじょうぶ" },
+            { target: 0, effect: 1.41, msg: "こまってる人をさがしてたすけるよ" },
+            { target: 0, effect: 1.4, msg: "おうちがない人におうちを" },
+            { target: 0, effect: 1.39, msg: "みんなにあたたかいふくを" },
+            { target: 0, effect: 1.38, msg: "ひとりぼっちをなくすよ" },
+            { target: 0, effect: 1.37, msg: "みんなでごはんをたべよう" },
+            { target: 0, effect: 1.36, msg: "おかねがなくてもびょういんへ" },
+            { target: 0, effect: 1.35, msg: "こどもにえがおをふやすよ" },
+            { target: 0, effect: 1.34, msg: "おとしよりにやさしくするよ" },
+            { target: 0, effect: 1.33, msg: "みんながしあわせになるように" },
+            { target: 0, effect: 1.32, msg: "ともだちをふやそうね" },
+            { target: 0, effect: 1.31, msg: "みんなでいっしょにがんばろう" },
+            { target: 0, effect: 1.3, msg: "こまったらすぐにたすけるよ" },
+            { target: 1, effect: 1.45, msg: "スーパーのねだんをさげるよ" },
+            { target: 1, effect: 1.4, msg: "でんきだいをやすくするよ" },
+            { target: 1, effect: 1.35, msg: "くらしをらくにするよ" },
+            { target: 1, effect: 1.3, msg: "たべものをやすくするよ" },
+            { target: 1, effect: 1.25, msg: "みんなのせいかつをよくするよ" },
+            { target: 1, effect: 1.44, msg: "やすいおかしをふやすよ" },
+            { target: 1, effect: 1.43, msg: "おこづかいでもかえるように" },
+            { target: 1, effect: 1.42, msg: "おかねがなくてもたべられるよ" },
+            { target: 1, effect: 1.41, msg: "おかいものがたのしくなるよ" },
+            { target: 1, effect: 1.4, msg: "おかねをたいせつにつかえるように" },
+            { target: 1, effect: 1.39, msg: "おかねをへらさないようにするよ" },
+            { target: 1, effect: 1.38, msg: "おかねがたりなくてもだいじょうぶ" },
+            { target: 1, effect: 1.37, msg: "おかねをつかわなくてもくらせるよ" },
+            { target: 1, effect: 1.36, msg: "おかねをつかわずにたのしもう" },
+            { target: 1, effect: 1.35, msg: "おかねをたいせつにしようね" },
+            { target: 1, effect: 1.34, msg: "おかねをへらさないようにするよ" },
+            { target: 1, effect: 1.33, msg: "おかねがなくてもえがおに" },
+            { target: 1, effect: 1.32, msg: "おかねをつかわずにあそぼう" },
+            { target: 1, effect: 1.31, msg: "おかねをつかわずにたべよう" },
+            { target: 1, effect: 1.3, msg: "おかねをつかわずにくらそう" },
+            { target: 2, effect: 1.45, msg: "おとしよりをたいせつにするよ" },
+            { target: 2, effect: 1.4, msg: "こどもをまもるよ" },
+            { target: 2, effect: 1.35, msg: "みんながにこにこするようにするよ" },
+            { target: 2, effect: 1.3, msg: "こどもがあんしんしてくらせるように" },
+            { target: 2, effect: 1.25, msg: "みんながたのしくすごせるようにするよ" },
+            { target: 2, effect: 1.44, msg: "こどもがわらえるまちにするよ" },
+            { target: 2, effect: 1.43, msg: "おじいちゃんもげんきに" },
+            { target: 2, effect: 1.42, msg: "おかあさんがほっとできるように" },
+            { target: 2, effect: 1.41, msg: "みんなでにこにこすごそう" },
+            { target: 2, effect: 1.4, msg: "こどもがまいにちたのしいように" },
+            { target: 2, effect: 1.39, msg: "おじいちゃんとあそぼう" },
+            { target: 2, effect: 1.38, msg: "おばあちゃんにやさしくしよう" },
+            { target: 2, effect: 1.37, msg: "こどもがまいごにならないように" },
+            { target: 2, effect: 1.36, msg: "みんなでおでかけしよう" },
+            { target: 2, effect: 1.35, msg: "おうちであんしんしてすごせるよ" },
+            { target: 2, effect: 1.34, msg: "こどもがひとりにならないように" },
+            { target: 2, effect: 1.33, msg: "おじいちゃんとおばあちゃんをだいじに" },
+            { target: 2, effect: 1.32, msg: "こどもがけんこうにそだつように" },
+            { target: 2, effect: 1.31, msg: "みんなでえがおをふやそう" },
+            { target: 2, effect: 1.3, msg: "こどもがゆめをもてるように" },
+            { target: 3, effect: 1.45, msg: "はたらく人をおうえんするよ" },
+            { target: 3, effect: 1.4, msg: "もっとおかねをもらえるようにするよ" },
+            { target: 3, effect: 1.35, msg: "しごとをふやすよ" },
+            { target: 3, effect: 1.3, msg: "がんばった人がえらばれるようにするよ" },
+            { target: 3, effect: 1.25, msg: "みんなのしごとをまもるよ" },
+            { target: 3, effect: 1.44, msg: "がんばった人がほめられるよ" },
+            { target: 3, effect: 1.43, msg: "しごとをがんばる人をまもるよ" },
+            { target: 3, effect: 1.42, msg: "がんばったらゆめがかなうよ" },
+            { target: 3, effect: 1.41, msg: "しごとでえがおになれるように" },
+            { target: 3, effect: 1.4, msg: "がんばる人がそんしないように" },
+            { target: 3, effect: 1.39, msg: "しごとをしている人にありがとう" },
+            { target: 3, effect: 1.38, msg: "がんばったらいいことがあるよ" },
+            { target: 3, effect: 1.37, msg: "しごとをたのしくするよ" },
+            { target: 3, effect: 1.36, msg: "しごとをえらべるようにするよ" },
+            { target: 3, effect: 1.35, msg: "がんばる人がゆうしょうするよ" },
+            { target: 3, effect: 1.34, msg: "しごとでせかいをよくするよ" },
+            { target: 3, effect: 1.33, msg: "しごとをたいせつにしよう" },
+            { target: 3, effect: 1.32, msg: "がんばる人をおうえんするよ" },
+            { target: 3, effect: 1.31, msg: "しごとでじぶんをみがこう" },
+            { target: 3, effect: 1.3, msg: "しごとでゆめをかなえよう" },
+            { target: 4, effect: 1.45, msg: "おかねもちになれるようにするよ" },
+            { target: 4, effect: 1.4, msg: "じぶんのゆめをかなえよう" },
+            { target: 4, effect: 1.35, msg: "がんばった人がかつよ" },
+            { target: 4, effect: 1.3, msg: "じぶんのちからでせいこうしよう" },
+            { target: 4, effect: 1.25, msg: "もっとかせげるようにするよ" },
+            { target: 4, effect: 1.44, msg: "じぶんのちからでゆめをつかもう" },
+            { target: 4, effect: 1.43, msg: "がんばった人がゆうしょうするよ" },
+            { target: 4, effect: 1.42, msg: "じぶんのちからでまもろう" },
+            { target: 4, effect: 1.41, msg: "じぶんのゆめをじぶんでかなえよう" },
+            { target: 4, effect: 1.4, msg: "じぶんのせいかでほこらしく" },
+            { target: 4, effect: 1.39, msg: "じぶんのちからをしんじよう" },
+            { target: 4, effect: 1.38, msg: "じぶんでかせいでじぶんでつかおう" },
+            { target: 4, effect: 1.37, msg: "じぶんのせいかでえがおに" },
+            { target: 4, effect: 1.36, msg: "じぶんのちからでせかいをかえよう" },
+            { target: 4, effect: 1.35, msg: "じぶんのちからでまちをよくしよう" },
+            { target: 4, effect: 1.34, msg: "じぶんのちからでかぞくをまもろう" },
+            { target: 4, effect: 1.33, msg: "じぶんのちからでともだちをたすけよう" },
+            { target: 4, effect: 1.32, msg: "じぶんのちからでしあわせに" },
+            { target: 4, effect: 1.31, msg: "じぶんのちからでせいこうしよう" },
+            { target: 4, effect: 1.3, msg: "じぶんのちからでえがおを" },
+            { target: 5, effect: 1.45, msg: "国をまもるよ" },
+            { target: 5, effect: 1.4, msg: "つよい国をつくるよ" },
+            { target: 5, effect: 1.35, msg: "みんなでちからをあわせよう" },
+            { target: 5, effect: 1.3, msg: "まけない国にするよ" },
+            { target: 5, effect: 1.25, msg: "せかいにほこられる国にするよ" },
+            { target: 5, effect: 1.44, msg: "にほんをもっとつよくするよ" },
+            { target: 5, effect: 1.43, msg: "みんなで国をまもろう" },
+            { target: 5, effect: 1.42, msg: "にほんをたいせつにしよう" },
+            { target: 5, effect: 1.41, msg: "こまったときはたすけあおう" },
+            { target: 5, effect: 1.4, msg: "にほんをしんじてまえへ" },
+            { target: 5, effect: 1.39, msg: "みんなで国をよくしよう" },
+            { target: 5, effect: 1.38, msg: "にほんのちからをしんじよう" },
+            { target: 5, effect: 1.37, msg: "にほんをせかいにひろめよう" },
+            { target: 5, effect: 1.36, msg: "にほんのぶんかをまもるよ" },
+            { target: 5, effect: 1.35, msg: "にほんのれきしをたいせつに" },
+            { target: 5, effect: 1.34, msg: "みんなでちからをあわせよう" },
+            { target: 5, effect: 1.33, msg: "にほんをえがおでいっぱいに" },
+            { target: 5, effect: 1.32, msg: "にほんをまもるひとをそだてるよ" },
+            { target: 5, effect: 1.31, msg: "にほんのあしたをつくろう" },
+            { target: 5, effect: 1.3, msg: "にほんをせかいのひかりに" },
+        ];
+
+
+        const setBodyHeight = () => {
+            document.body.style.height = `${window.innerHeight}px`;
+        };
+        window.addEventListener('DOMContentLoaded', setBodyHeight);
+        window.addEventListener('resize', setBodyHeight);
+
+        const roundClock = () => {
+            let [hours, minutes] = nowtime.split(":").map(Number);
+            let date = new Date();
+            date.setHours(hours, minutes + 5);
+            nowtime = date.toTimeString().slice(0, 5);
+            document.getElementById('clock').textContent = nowtime;
+        };
+
+        const vote = () => {
+            const totalWeight = politicalParties.reduce((sum, p) => sum + p.parity * p.coef, 0);
+            const weights = politicalParties.map(p => (p.parity * p.coef) / totalWeight);
+            let r = Math.random(), cumulative = 0;
+            for (let i = 0; i < weights.length; i++) {
+                cumulative += weights[i];
+                if (r < cumulative) {
+                    politicalParties[i].point++;
+                    break;
+                }
+            }
+        };
+
+        const commonActions = () => {
+            roundClock();
+            vote();
+            updateDisplay();
+            voteSum++;
+            createCiviler();
+        };
+
+        const updateDisplay = () => {
+            const maxPoint = Math.max(...politicalParties.map(p => p.point));
+            const scaleBase = Math.max(maxPoint, 50);
+
+            politicalParties.forEach((party, index) => {
+                const nameEl = document.getElementById(`sp_name${index}`);
+                const pointEl = document.getElementById(`sp_point${index}`);
+                const barEl = document.getElementById(`sp_grh${index}`);
+                const colorEl = document.getElementById(`sp_color${index}`);
+
+                nameEl.textContent = party.name;
+                pointEl.textContent = party.point;
+                barEl.style.transform = `scaleX(${party.point / scaleBase})`;
+                barEl.style.backgroundColor = party.color;
+                colorEl.style.color = party.color;
+            });
+        };
+
+        const resultmaxParty = () => {
+            const maxParty = politicalParties.reduce((max, p) => p.point > max.point ? p : max);
+            const result = document.getElementById('result');
+            const reloadBtn = document.getElementById('reloadBtn');
+
+            reloadBtn.classList.remove('hidden');
+            result.innerHTML = `<span style="color: ${maxParty.color}; font-weight: bold">${maxParty.name}</span> が当選しました！`;
+        };
+
+        const chosePublicOpinionMessage = () => {
+            const selectedMsg = publicOpinionMsg[Math.floor(Math.random() * publicOpinionMsg.length)];
+            const party = politicalParties[selectedMsg.target];
+
+            party.coef += selectedMsg.effect * timecoenum;
+            timecoenum = (timecoenum + 1) * 1.2;
+
+            const newsName = document.getElementById('newsName');
+            const newsP = document.getElementById('newsP');
+            const newsS = document.getElementById('newsS');
+
+            newsName.textContent = party.name;
+            newsName.style.color = party.color;
+            newsP.textContent = selectedMsg.msg;
+            newsS.style.color = party.color;
+        };
+
+        const createCiviler = () => {
+            const container = document.getElementById('civiler');
+            const weights = politicalParties.map(p => p.parity * p.coef);
+            const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+
+            const rawAllocations = weights.map(w => (w / totalWeight) * 80);
+            const allocations = rawAllocations.map(Math.floor);
+            let remainder = 80 - allocations.reduce((sum, a) => sum + a, 0);
+
+            const remainders = rawAllocations.map((val, i) => ({ i, frac: val - allocations[i] }))
+                                            .sort((a, b) => b.frac - a.frac);
+            for (let j = 0; j < remainder; j++) {
+                allocations[remainders[j].i]++;
+            }
+
+            let newColorPool = [...previousColorPool];
+
+            politicalParties.forEach((party, i) => {
+                const color = party.color;
+                const prevCount = previousAllocations[i] || 0;
+                const newCount = allocations[i];
+
+                if (newCount > prevCount) {
+                    for (let j = 0; j < newCount - prevCount; j++) {
+                        const index = Math.floor(Math.random() * (newColorPool.length + 1));
+                        newColorPool.splice(index, 0, color);
+                    }
+                } else if (newCount < prevCount) {
+                    let removed = 0;
+                    for (let j = 0; j < newColorPool.length && removed < (prevCount - newCount); j++) {
+                        if (newColorPool[j] === color) {
+                            newColorPool.splice(j, 1);
+                            removed++;
+                            j--;
+                        }
+                    }
+                }
+            });
+
+            newColorPool.forEach((color, i) => {
+                let span = document.getElementById(`civiler${i}`);
+                if (!span) {
+                    span = document.createElement("span");
+                    span.innerHTML = `<i class="bi bi-person-fill"></i>`;
+                    span.id = `civiler${i}`;
+                    container.appendChild(span);
+                }
+                if (span.style.color !== color) {
+                    span.style.color = color;
+                }
+            });
+
+            let i = newColorPool.length;
+            while (document.getElementById(`civiler${i}`)) {
+                container.removeChild(document.getElementById(`civiler${i}`));
+                i++;
+            }
+
+            previousAllocations = allocations;
+            previousColorPool = newColorPool;
+        };
+
+        const initializeButtons = () => {
+            politicalParties.forEach((party, i) => {
+                const button = document.getElementById(`btn${i}`);
+                button.style.border = `2px solid ${party.color}`;
+                button.style.color = party.color;
+
+                button.addEventListener('click', () => {
+                    // 他のボタンを透明に
+                    politicalParties.forEach((_, j) => {
+                        if (j !== i) {
+                            document.getElementById(`btn${j}`).classList.add('transparent');
+                        }
+                    });
+
+                    // グラフとポイント表示を有効化
+                    document.querySelectorAll('.sp_point, .sp_grh').forEach(el => {
+                        el.classList.remove('transparent');
+                    });
+
+                    selectedPartyIndex = i; //選ばれた政党番号
+                });
+            });
+        };
+
+        const passTimes = () => {
+            const newsComment = document.getElementById('newsComment');
+
+            setTimeout(() => {
+                if (nowtime === "20:00") {
+                    resultmaxParty();
+                } else if (nowtime.endsWith(":00") && nowtime !== "8:00") {
+                    chosePublicOpinionMessage();
+                    newsComment.classList.add('active');
+
+                    setTimeout(() => {
+                        commonActions();
+                        passTimes();
+                        newsComment.classList.remove('active');
+                    }, 3000);
+                } else {
+                    commonActions();
+                    passTimes();
+                }
+            }, 1000 / timespeed);
+        };
+
+        // 初期化処理
+        initializeButtons();
+        passTimes();
+    </script>
+
+</body>
+</html>
